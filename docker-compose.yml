@@ -1,6 +1,6 @@
 services:
   kafka:
-    image: apache/kafka:latest
+    image: apache/kafka:4.3.1
     container_name: kafka
     ports:
       - "29092:29092"
@@ -25,7 +25,7 @@ services:
       retries: 5
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: provectuslabs/kafka-ui:v0.7.2
     container_name: kafka-ui
     ports:
       - "8080:8080"
@@ -35,3 +35,46 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  spark:
+    image: apache/spark:4.2.0
+    container_name: spark
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark --port 7077 --webui-port 8080
+    ports:
+      - "8081:8080"
+      - "7077:7077"
+    environment:
+      SPARK_MODE: master
+      SPARK_MASTER_PORT: 7077
+      SPARK_MASTER_WEBUI_PORT: 8080
+    depends_on:
+      - kafka
+    volumes:
+      - ./spark_job.py:/opt/spark/work-dir/spark_job.py
+      - ./spark:/opt/spark/work-dir/spark
+      - ./data:/opt/spark/work-dir/data
+
+  spark-worker:
+    image: apache/spark:4.2.0
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark:7077 --cores 6 --memory 10G
+    depends_on:
+      - spark
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark:7077
+      SPARK_WORKER_CORES: 6
+      SPARK_WORKER_MEMORY: 10G
+    volumes:
+      - ./spark_job.py:/opt/spark/work-dir/spark_job.py
+      - ./spark:/opt/spark/work-dir/spark
+      - ./data:/opt/spark/work-dir/data
+
+  viz:
+    image: python:3.13-slim
+    working_dir: /app
+    command: sh -c "pip install -q --no-cache-dir streamlit pandas pyarrow && streamlit run app.py --server.port 8501 --server.address 0.0.0.0"
+    ports:
+      - "127.0.0.1:8501:8501"
+    volumes:
+      - ./viz:/app
+      - ./data:/app/data:ro

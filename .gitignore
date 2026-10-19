@@ -1,3 +1,26 @@
+# ===================================================================
+# PROJECT-SPECIFIC (vbb-realtime-data-pipeline)
+# ===================================================================
+
+# Downloaded inputs + ALL pipeline output. Regenerate via RUN_ORDER.md.
+#   data/gtfs.zip        manual weekly download from VBB datasets page
+#   data/gtfs/           extracted by main.py
+#   data/gtfs-rt.{pb,json}  rewritten by every main.py run
+#   data/{bronze,silver,gold,checkpoints}/  Spark output
+/data/
+
+# Streamlit data mount point. Empty on the host: docker-compose mounts
+# ./data -> /app/data:ro over it, so nothing here is ever source.
+/viz/data/
+
+# JetBrains / VS Code
+.idea/
+.vscode/
+
+# ===================================================================
+# GENERIC PYTHON TEMPLATE BELOW (mostly unused in this project)
+# ===================================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

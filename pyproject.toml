@@ -5,7 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "confluent-kafka==2.16.0",
+    "gtfs-realtime-bindings>=3.0.0",
     "pandas>=3.0.6",
+    "protobuf>=7.36.2",
+    "pyarrow>=26.0.0",
+    "python-dotenv>=1.2.4",
+    "requests>=2.34.2",
 ]
 
 [dependency-groups]
